@@ -1,0 +1,160 @@
+[
+  {
+    "id": "2b2cdbae-38ed-4fed-95a0-5b0d4ac93fdf",
+    "createdAt": 1765976307408,
+    "privacyScore": 90,
+    "entropyScore": 0,
+    "leaks": {
+      "webrtc": false,
+      "dns": "none",
+      "battery": false,
+      "motion": false
+    },
+    "apiSurface": {
+      "WebRTC": "sealed"
+    },
+    "report": {
+      "meta": {
+        "scanId": "webrtc-127.0.0.1",
+        "time": 1765976307408
+      },
+      "privacyIndex": {
+        "score": 90,
+        "exposureLevel": "low",
+        "leakedBits": 4
+      },
+      "hardwareLeaks": {},
+      "networkLeaks": {
+        "webrtc": "sealed",
+        "ip": "127.0.0.1"
+      },
+      "apiSurface": {}
+    }
+  },
+  {
+    "id": "1248b1ef-6e58-448b-872a-118d520628e9",
+    "createdAt": 1765976291498,
+    "privacyScore": 55,
+    "entropyScore": 16,
+    "leaks": {
+      "webrtc": false,
+      "dns": "full",
+      "battery": false,
+      "motion": false
+    },
+    "apiSurface": {
+      "resolver": "Cisco OpenDNS LLC"
+    },
+    "report": {
+      "meta": {
+        "scanId": "dns-36f4ae1e-ddb0-4435-8a7a-04ada682da96",
+        "time": 1765976291498
+      },
+      "privacyIndex": {
+        "score": 55,
+        "exposureLevel": "high",
+        "leakedBits": 24
+      },
+      "hardwareLeaks": {},
+      "networkLeaks": {
+        "dns": "full",
+        "ip": "127.0.0.1"
+      },
+      "apiSurface": {}
+    }
+  },
+  {
+    "id": "9553abed-336b-4351-9b6a-4d9fca7ddf05",
+    "createdAt": 1765976271910,
+    "privacyScore": 0,
+    "entropyScore": 0,
+    "leaks": {
+      "webrtc": false,
+      "dns": "none",
+      "battery": false,
+      "motion": false
+    },
+    "apiSurface": {
+      "ip": "unknown"
+    },
+    "report": {
+      "meta": {
+        "scanId": "f4358c70-38e3-49b6-a826-134d13bd4355",
+        "time": 1765976271910
+      },
+      "privacyIndex": {
+        "score": 0,
+        "exposureLevel": "critical",
+        "leakedBits": 0
+      },
+      "hardwareLeaks": {},
+      "networkLeaks": {
+        "webrtc": "sealed"
+      },
+      "apiSurface": {}
+    }
+  },
+  {
+    "id": "f271d8e3-1776-4aae-9dee-bc017539c977",
+    "createdAt": 1765976263543,
+    "privacyScore": 0,
+    "entropyScore": 100,
+    "leaks": {
+      "webrtc": false,
+      "dns": "none",
+      "battery": false,
+      "motion": false
+    },
+    "apiSurface": {
+      "isp": "AS15169 Google LLC",
+      "asn": "AS15169"
+    },
+    "report": {
+      "meta": {
+        "scanId": "ip-8.8.8.8",
+        "time": 1765976263543
+      },
+      "privacyIndex": {
+        "score": 0,
+        "exposureLevel": "low",
+        "leakedBits": 8
+      },
+      "hardwareLeaks": {},
+      "networkLeaks": {
+        "ip": "8.8.8.8"
+      },
+      "apiSurface": {}
+    }
+  },
+  {
+    "id": "1fdc695b-ffd8-48a8-ad3c-e192fc9431dd",
+    "createdAt": 1765975487148,
+    "privacyScore": 0,
+    "entropyScore": 0,
+    "leaks": {
+      "webrtc": false,
+      "dns": "none",
+      "battery": false,
+      "motion": false
+    },
+    "apiSurface": {
+      "ip": "unknown"
+    },
+    "report": {
+      "meta": {
+        "scanId": "6aeccef6-e87e-4b19-b4e9-41553b80e0b4",
+        "time": 1765975487148
+      },
+      "privacyIndex": {
+        "score": 0,
+        "exposureLevel": "critical",
+        "leakedBits": 0
+      },
+      "hardwareLeaks": {},
+      "networkLeaks": {
+        "webrtc": "sealed"
+      },
+      "apiSurface": {}
+    }
+  }
+]

@@ -1,0 +1,325 @@
+// BrowserLeaks.io Database Schema
+// Database: Cloudflare D1 (SQLite-based serverless SQL)
+// Local Development: SQLite (file:./dev.db)
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// SCAN & FINGERPRINT MODELS
+// ============================================
+
+model Scan {
+  id              String   @id @default(cuid())
+  visitorId       String   @map("visitor_id")
+  sessionId       String   @map("session_id")
+  userAgent       String   @map("user_agent")
+  ip              String?
+  country         String?
+  city            String?
+
+  // Privacy Score
+  totalScore      Int      @default(0) @map("total_score")
+  riskLevel       String   @default("HIGH") @map("risk_level") // LOW, MEDIUM, HIGH, CRITICAL
+
+  // Timestamps
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  fingerprint     Fingerprint?
+  ipLeak          IPLeak?
+  dnsLeak         DNSLeak?
+  webrtcLeak      WebRTCLeak?
+
+  @@index([visitorId])
+  @@index([createdAt])
+  @@map("scans")
+}
+
+model Fingerprint {
+  id              String   @id @default(cuid())
+  scanId          String   @unique @map("scan_id")
+  scan            Scan     @relation(fields: [scanId], references: [id], onDelete: Cascade)
+
+  // Canvas
+  canvasHash      String?  @map("canvas_hash")
+  canvasWinding   Boolean? @map("canvas_winding")
+
+  // WebGL
+  webglHash       String?  @map("webgl_hash")
+  webglVendor     String?  @map("webgl_vendor")
+  webglRenderer   String?  @map("webgl_renderer")
+
+  // Audio
+  audioHash       String?  @map("audio_hash")
+  audioValue      Float?   @map("audio_value")
+
+  // Fonts
+  fontHash        String?  @map("font_hash")
+  fontCount       Int?     @map("font_count")
+  fonts           String   @default("[]") // JSON array of font names
+
+  // Timezone
+  timezone        String?
+  timezoneOffset  Int?     @map("timezone_offset")
+
+  // Screen
+  screenWidth     Int?     @map("screen_width")
+  screenHeight    Int?     @map("screen_height")
+  colorDepth      Int?     @map("color_depth")
+  devicePixelRatio Float?  @map("device_pixel_ratio")
+
+  // Navigator
+  platform        String?
+  language        String?
+  languages       String   @default("[]") // JSON array of languages
+  hardwareConcurrency Int? @map("hardware_concurrency")
+  deviceMemory    Float?   @map("device_memory")
+  maxTouchPoints  Int?     @map("max_touch_points")
+
+  // Browser Detection
+  browserEngine   String?  @map("browser_engine")
+  isMobile        Boolean? @map("is_mobile")
+  isChromium      Boolean? @map("is_chromium")
+  isGecko         Boolean? @map("is_gecko")
+  isWebKit        Boolean? @map("is_webkit")
+
+  // Combined hash for comparison
+  combinedHash    String?  @map("combined_hash")
+  uniquenessScore Float?   @map("uniqueness_score")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([combinedHash])
+  @@index([canvasHash])
+  @@index([webglHash])
+  @@map("fingerprints")
+}
+
+model IPLeak {
+  id              String   @id @default(cuid())
+  scanId          String   @unique @map("scan_id")
+  scan            Scan     @relation(fields: [scanId], references: [id], onDelete: Cascade)
+
+  ip              String
+  version         String?  // ipv4 or ipv6
+
+  // Geolocation
+  country         String?
+  countryCode     String?  @map("country_code")
+  city            String?
+  region          String?
+  timezone        String?
+  latitude        Float?
+  longitude       Float?
+
+  // ASN Info
+  asnNumber       Int?     @map("asn_number")
+  asnName         String?  @map("asn_name")
+  asnOrganization String?  @map("asn_organization")
+
+  // Privacy indicators
+  isProxy         Boolean? @map("is_proxy")
+  isVpn           Boolean? @map("is_vpn")
+  isTor           Boolean? @map("is_tor")
+  isDatacenter    Boolean? @map("is_datacenter")
+  isRelay         Boolean? @map("is_relay")
+
+  // Reputation
+  reputationScore Int?     @map("reputation_score")
+  isBlacklisted   Boolean? @map("is_blacklisted")
+
+  // Source of data
+  dataSource      String?  @map("data_source")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([ip])
+  @@map("ip_leaks")
+}
+
+model DNSLeak {
+  id              String   @id @default(cuid())
+  scanId          String   @unique @map("scan_id")
+  scan            Scan     @relation(fields: [scanId], references: [id], onDelete: Cascade)
+
+  testId          String   @map("test_id")
+  isLeak          Boolean  @map("is_leak")
+  leakType        String   @map("leak_type") // NONE, PARTIAL, FULL
+
+  // Detected servers
+  servers         String   @default("[]") @map("servers") // JSON string
+  serverCount     Int      @default(0) @map("server_count")
+
+  // DNS Security
+  dohEnabled      Boolean? @map("doh_enabled")
+  dotEnabled      Boolean? @map("dot_enabled")
+  usingIspDns     Boolean? @map("using_isp_dns")
+
+  // Analysis
+  risks           String   @default("[]") // JSON string
+  recommendations String   @default("[]") // JSON string
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("dns_leaks")
+}
+
+model WebRTCLeak {
+  id              String   @id @default(cuid())
+  scanId          String   @unique @map("scan_id")
+  scan            Scan     @relation(fields: [scanId], references: [id], onDelete: Cascade)
+
+  isLeak          Boolean  @map("is_leak")
+
+  // Detected IPs
+  localIPs        String   @default("[]") @map("local_ips") // JSON array of local IP addresses
+  publicIP        String?  @map("public_ip")
+  ipv6            String?
+
+  // Leak details
+  localIPLeak     Boolean? @map("local_ip_leak")
+  publicIPLeak    Boolean? @map("public_ip_leak")
+  mdnsLeak        Boolean? @map("mdns_leak")
+  ipv6Leak        Boolean? @map("ipv6_leak")
+
+  // NAT type
+  natType         String?  @map("nat_type")
+
+  // Analysis
+  risks           String   @default("[]") // JSON string
+  recommendations String   @default("[]") // JSON string
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("webrtc_leaks")
+}
+
+// ============================================
+// ANALYTICS & TELEMETRY
+// ============================================
+
+model PrivacyScore {
+  id              String   @id @default(cuid())
+  visitorId       String   @map("visitor_id")
+
+  totalScore      Int      @map("total_score")
+  maxScore        Int      @default(100) @map("max_score")
+  riskLevel       String   @map("risk_level") // LOW, MEDIUM, HIGH, CRITICAL
+
+  // Breakdown
+  ipPrivacy       Int      @default(0) @map("ip_privacy")
+  dnsPrivacy      Int      @default(0) @map("dns_privacy")
+  webrtcPrivacy   Int      @default(0) @map("webrtc_privacy")
+  fingerprintResistance Int @default(0) @map("fingerprint_resistance")
+  browserConfig   Int      @default(0) @map("browser_config")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([visitorId])
+  @@index([createdAt])
+  @@map("privacy_scores")
+}
+
+model TelemetryEvent {
+  id              String   @id @default(cuid())
+  eventType       String   @map("event_type")
+  visitorId       String?  @map("visitor_id")
+  sessionId       String?  @map("session_id")
+
+  // Event data
+  data            String   @default("{}") // JSON string
+
+  // Context
+  userAgent       String?  @map("user_agent")
+  ip              String?
+  country         String?
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([eventType])
+  @@index([visitorId])
+  @@index([createdAt])
+  @@map("telemetry_events")
+}
+
+// ============================================
+// SHARED FINGERPRINTS (for uniqueness calculation)
+// ============================================
+
+model SharedFingerprint {
+  id              String   @id @default(cuid())
+  hash            String   @unique
+
+  // Component hashes
+  canvasHash      String?  @map("canvas_hash")
+  webglHash       String?  @map("webgl_hash")
+  audioHash       String?  @map("audio_hash")
+  fontHash        String?  @map("font_hash")
+
+  // Statistics
+  seenCount       Int      @default(1) @map("seen_count")
+  firstSeenAt     DateTime @default(now()) @map("first_seen_at")
+  lastSeenAt      DateTime @default(now()) @map("last_seen_at")
+
+  @@index([hash])
+  @@index([canvasHash])
+  @@index([webglHash])
+  @@map("shared_fingerprints")
+}
+
+// ============================================
+// SHARE LINKS
+// ============================================
+
+model ShareLink {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  scanData        String   @map("scan_data") // JSON string of SharedScan
+
+  // Access control
+  expiresAt       DateTime? @map("expires_at")
+  viewCount       Int      @default(0) @map("view_count")
+  maxViews        Int?     @map("max_views")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([code])
+  @@map("share_links")
+}
+
+// ============================================
+// SCAN HISTORY
+// ============================================
+
+model ScanHistory {
+  id              String   @id @default(cuid())
+  visitorId       String   @map("visitor_id")
+  scanData        String   @map("scan_data") // JSON string of scan result
+
+  // Indexed fields for filtering
+  privacyScore    Int?     @map("privacy_score")
+  riskLevel       String?  @map("risk_level") // LOW, MEDIUM, HIGH, CRITICAL
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([visitorId])
+  @@index([createdAt])
+  @@map("scan_history")
+}
+
+// ============================================
+// ENUMS (SQLite doesn't support native ENUMs)
+// ============================================
+// Use String fields with comments to document allowed values
+//
+// RiskLevel: LOW | MEDIUM | HIGH | CRITICAL
+// LeakType: NONE | PARTIAL | FULL

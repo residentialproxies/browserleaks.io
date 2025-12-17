@@ -1,0 +1,62 @@
+# GitHub Actions Workflow for Cloudflare Worker Deployment
+name: Deploy Web to Cloudflare Worker
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - '.github/workflows/deploy-web.yml'
+  workflow_dispatch:
+
+# 只允许一个部署任务同时运行
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Web App
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for Cloudflare
+        env:
+          NEXT_PUBLIC_API_URL: https://api.browserleaks.io
+        run: |
+          cd apps/web
+          npm run build:cloudflare
+          # patch-worker.js runs automatically as part of build:cloudflare
+
+      - name: Deploy to Cloudflare Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'apps/web'
+          command: deploy
+
+      - name: Comment deployment URL
+        if: github.event_name == 'push'
+        run: |
+          echo "Deployment successful!"
+          echo "Worker URL: https://browserleaks-web.residentialproxies.workers.dev"
+          echo "Custom Domain: https://browserleaks.io (configure in Cloudflare)"

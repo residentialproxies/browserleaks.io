@@ -1,0 +1,26 @@
+# Cloudflare Worker Configuration for BrowserLeaks.io Web App
+# This configuration deploys Next.js app as a Cloudflare Worker with Assets
+
+name = "browserleaks-web"
+main = ".open-next/worker.js"
+compatibility_date = "2024-12-09"
+compatibility_flags = ["nodejs_compat"]
+account_id = "0115b4d62654b05e74613c82dcc07131"
+
+# Worker settings
+workers_dev = true
+minify = false
+
+# Assets configuration - using experimental assets
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+# Environment Variables (non-sensitive)
+[vars]
+NODE_ENV = "production"
+NEXT_PUBLIC_API_URL = "https://api.browserleaks.io"
+
+# Build command (reference only - actual build done before wrangler)
+# Build: npm run build:cloudflare
+# Deploy: npx wrangler deploy

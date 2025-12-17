@@ -1,0 +1,18 @@
+# Cloudflare Pages Configuration for BrowserLeaks.io Web App
+# This configuration is specifically for Pages deployment
+
+name = "browserleaks-io"
+compatibility_date = "2024-12-09"
+compatibility_flags = ["nodejs_compat"]
+
+# Pages configuration
+pages_build_output_dir = ".open-next/assets"
+
+# Environment Variables (non-sensitive)
+[vars]
+NODE_ENV = "production"
+NEXT_PUBLIC_API_URL = "https://api.browserleaks.io"
+
+# Build command (reference only - actual build done before wrangler)
+# Build: npm run build:cloudflare
+# Deploy: npx wrangler pages deploy .open-next/assets --project-name=browserleaks-io

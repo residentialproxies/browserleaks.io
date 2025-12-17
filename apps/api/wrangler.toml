@@ -1,0 +1,72 @@
+# Cloudflare Workers Configuration for BrowserLeaks.io API
+# This Worker replaces the Express server for serverless deployment
+
+name = "browserleaks-api"
+main = "src/worker.ts"
+compatibility_date = "2024-12-09"
+compatibility_flags = ["nodejs_compat"]
+account_id = "0115b4d62654b05e74613c82dcc07131"
+
+# Worker settings
+workers_dev = true
+minify = false
+
+# D1 Database Binding (SQLite-based serverless SQL)
+# Commented out for initial deployment - create database first:
+# wrangler d1 create browserleaks-prod
+# Then uncomment and update database_id
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "browserleaks-prod"
+# database_id = "59b7b435-76f0-41d9-be2f-9b8207c82848"
+# migrations_dir = "migrations"
+
+# KV Namespace for Caching
+# Commented out for initial deployment - create KV namespace first:
+# wrangler kv:namespace create CACHE
+# Then uncomment and update id
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "30ca3a27ac0b4e35a02b3b81e1f16886"
+
+# KV Namespace for Rate Limiting
+# Commented out for initial deployment - create KV namespace first:
+# wrangler kv:namespace create RATE_LIMIT
+# Then uncomment and update id
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT"
+# id = "f6925b5c61d546d099e571d9f8015b6b"
+
+# Environment Variables (non-sensitive, public)
+[vars]
+NODE_ENV = "production"
+API_PORT = "3001" # Not used in Workers, kept for compatibility
+CORS_ORIGIN = "https://browserleaks.io"
+
+# Secrets (sensitive values - set with: wrangler secret put <KEY>)
+# Run these commands to set secrets:
+#   wrangler secret put IPINFO_TOKEN
+#   wrangler secret put JWT_SECRET
+#   wrangler secret put CLOUDFLARE_RADAR_TOKEN
+#
+# Required secrets:
+# - IPINFO_TOKEN: IPInfo.io API token for IP intelligence
+# - JWT_SECRET: Secret key for JWT signing (generate with: openssl rand -base64 32)
+# - CLOUDFLARE_RADAR_TOKEN: Cloudflare Radar API token
+#
+# Optional secrets:
+# - CF_WORKER_DNS_BEACON_URL: URL for DNS leak detection beacon
+# - CF_WORKER_JA3_URL: URL for JA3 fingerprinting worker
+
+# Custom Domain Routing (configure after DNS setup)
+# routes = [
+#   { pattern = "api.browserleaks.io/*", zone_name = "browserleaks.io" }
+# ]
+
+# Build configuration (disabled for local dev - using direct TS execution)
+# [build]
+# command = "npm run build"
+
+# Observability
+[observability]
+enabled = true

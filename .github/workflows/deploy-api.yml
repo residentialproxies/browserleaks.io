@@ -1,0 +1,56 @@
+# GitHub Actions Workflow for Cloudflare Workers Deployment
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/api/**'
+      - '.github/workflows/deploy-api.yml'
+  workflow_dispatch:
+
+# 只允许一个部署任务同时运行
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy API Worker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'apps/api'
+          command: deploy --keep-vars
+        env:
+          IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CLOUDFLARE_RADAR_TOKEN: ${{ secrets.CLOUDFLARE_RADAR_TOKEN }}
+
+      - name: Health check
+        run: |
+          echo "Waiting for deployment to be live..."
+          sleep 10
+          curl -f https://browserleaks-api.residentialproxies.workers.dev/health || echo "Health check failed"
