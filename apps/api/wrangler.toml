@@ -5,37 +5,34 @@ name = "browserleaks-api"
 main = "src/worker.ts"
 compatibility_date = "2024-12-09"
 compatibility_flags = ["nodejs_compat"]
-account_id = "0115b4d62654b05e74613c82dcc07131"
+# account_id is provided via CLOUDFLARE_ACCOUNT_ID environment variable or --account-id flag
 
 # Worker settings
 workers_dev = true
 minify = false
 
 # D1 Database Binding (SQLite-based serverless SQL)
-# Commented out for initial deployment - create database first:
-# wrangler d1 create browserleaks-prod
-# Then uncomment and update database_id
+# To enable: Create database with `wrangler d1 create browserleaks-prod`
+# Then add configuration:
 # [[d1_databases]]
 # binding = "DB"
 # database_name = "browserleaks-prod"
-# database_id = "59b7b435-76f0-41d9-be2f-9b8207c82848"
+# database_id = "YOUR_DATABASE_ID_HERE"
 # migrations_dir = "migrations"
 
 # KV Namespace for Caching
-# Commented out for initial deployment - create KV namespace first:
-# wrangler kv:namespace create CACHE
-# Then uncomment and update id
+# To enable: Create namespace with `wrangler kv:namespace create CACHE`
+# Then add configuration:
 # [[kv_namespaces]]
 # binding = "CACHE"
-# id = "30ca3a27ac0b4e35a02b3b81e1f16886"
+# id = "YOUR_KV_NAMESPACE_ID_HERE"
 
 # KV Namespace for Rate Limiting
-# Commented out for initial deployment - create KV namespace first:
-# wrangler kv:namespace create RATE_LIMIT
-# Then uncomment and update id
+# To enable: Create namespace with `wrangler kv:namespace create RATE_LIMIT`
+# Then add configuration:
 # [[kv_namespaces]]
 # binding = "RATE_LIMIT"
-# id = "f6925b5c61d546d099e571d9f8015b6b"
+# id = "YOUR_KV_NAMESPACE_ID_HERE"
 
 # Environment Variables (non-sensitive, public)
 [vars]

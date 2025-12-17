@@ -5,7 +5,7 @@ name = "browserleaks-web"
 main = ".open-next/worker.js"
 compatibility_date = "2024-12-09"
 compatibility_flags = ["nodejs_compat"]
-account_id = "0115b4d62654b05e74613c82dcc07131"
+# account_id is provided via CLOUDFLARE_ACCOUNT_ID environment variable or --account-id flag
 
 # Worker settings
 workers_dev = true
